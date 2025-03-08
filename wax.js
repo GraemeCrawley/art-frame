@@ -8,7 +8,7 @@ const size_reduction_factor = 0.99; // Size reduction factor
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    gravity = createVector(0, gravity_value);
+    gravity = createVector(0, gravity_value * 0.1);
     
     for (let i = 0; i < num_drops; i++) {
         waxDroplets.push(new WaxDroplet(random(width), random(-height, 0)));
@@ -17,8 +17,8 @@ function setup() {
 
 function draw() {
     // Draw a semi-transparent black overlay instead of clearing completely
-    // fill(50, 50, 50, 50); // Low opacity to leave trails
-    // rect(0, 0, width, height);
+    fill(50, 50, 50, 50); // Low opacity to leave trails
+    rect(0, 0, width, height);
     
     for (let i = waxDroplets.length - 1; i >= 0; i--) {
         waxDroplets[i].applyForce(gravity);
@@ -37,40 +37,40 @@ class WaxDroplet {
         this.position = createVector(x, y);
         this.velocity = createVector(0, 0);
         this.acceleration = createVector(0, 0);
-        this.mass = random(min_mass, max_mass);
-        this.size = this.mass * 2;
-        this.trail = []; // Store previous positions
+        this.size = random(min_mass, max_mass); // Initial size of droplet
+        this.frictionCoefficient = 0.02; // Adjust for stronger or weaker slowing effect
     }
-    
+
     applyForce(force) {
-        let f = p5.Vector.div(force, this.mass);
+        let f = force.copy();
         this.acceleration.add(f);
     }
-    
+
     update() {
         this.velocity.add(this.acceleration);
+        
+        // Apply friction, which increases as the droplet shrinks
+        let friction = this.velocity.copy();
+        friction.mult(-1);
+        friction.normalize();
+        friction.mult(this.frictionCoefficient / this.size); // Smaller droplets experience more friction
+        this.velocity.add(friction);
+        
         this.position.add(this.velocity);
         this.acceleration.mult(0);
         
-        // Reduce size over time
+        // Simulate melting by reducing size over time
         this.size *= size_reduction_factor;
-        
-        // Store trail positions
-        this.trail.push(createVector(this.position.x, this.position.y));
-        if (this.trail.length > 50) {
-            this.trail.shift();
-        }
+        if (this.size < 2) this.size = 2; // Prevent disappearing entirely
     }
-    
+
     display() {
         noStroke();
-        
-        // Draw droplet
-        fill(255, 200, 0);
-        ellipse(this.position.x, this.position.y, this.size);
+        fill(255, 204, 100);
+        ellipse(this.position.x, this.position.y, this.size, this.size);
     }
-    
+
     isOffScreen() {
-        return this.position.y > height || this.size < 2;
+        return this.position.y > height + this.size;
     }
 }
