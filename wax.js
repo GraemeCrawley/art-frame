@@ -1,10 +1,11 @@
 let waxDroplets = [];
 let gravity;
 let num_drops = 10; // Number of falling droplets
-const min_mass = 15;
-const max_mass = 30;
+const min_mass = 30;
+const max_mass = 60;
 const gravity_value = 0.5; // Gravity value
-const size_reduction_factor = 0.99; // Size reduction factor
+const size_reduction_factor = 0.1; // Size reduction factor
+const global_friction_element = 0; // Global friction element
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -17,8 +18,8 @@ function setup() {
 
 function draw() {
     // Draw a semi-transparent black overlay instead of clearing completely
-    fill(50, 50, 50, 50); // Low opacity to leave trails
-    rect(0, 0, width, height);
+    // fill(50, 50, 50, 50); // Low opacity to leave trails
+    // rect(0, 0, width, height);
     
     for (let i = waxDroplets.length - 1; i >= 0; i--) {
         waxDroplets[i].applyForce(gravity);
@@ -38,7 +39,7 @@ class WaxDroplet {
         this.velocity = createVector(0, 0);
         this.acceleration = createVector(0, 0);
         this.size = random(min_mass, max_mass); // Initial size of droplet
-        this.frictionCoefficient = 0.02; // Adjust for stronger or weaker slowing effect
+        this.frictionCoefficient = global_friction_element; // Adjust for stronger or weaker slowing effect
     }
 
     applyForce(force) {
@@ -60,7 +61,7 @@ class WaxDroplet {
         this.acceleration.mult(0);
         
         // Simulate melting by reducing size over time
-        this.size *= size_reduction_factor;
+        this.size -= this.size * size_reduction_factor;
         if (this.size < 2) this.size = 2; // Prevent disappearing entirely
     }
 
