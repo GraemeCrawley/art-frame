@@ -11,7 +11,7 @@ let numParticles = 200;
  * Initializes the canvas and creates particles.
  */
 function setup() {
-    createCanvas(600, 600);
+    createCanvas(windowWidth, windowHeight);
     for (let i = 0; i < numParticles; i++) {
         particles.push(new Particle(random(width), random(height)));
     }
